@@ -54,7 +54,7 @@ func (repo *BooksRepository) ListAllBooks(ctx context.Context, filter entity.Boo
 func (repo *BooksRepository) GetABook(ctx context.Context, bookId string) (entity.Books, error) {
 	var data entity.Books
 
-	err := repo.DB.NewSelect().Model(&data).Where("id =?", bookId).Scan(ctx)
+	err := repo.DB.NewSelect().Model(&data).Where("id =?", bookId).Relation("Writer").Scan(ctx)
 
 	if err != nil {
 		return entity.Books{}, err
@@ -72,7 +72,7 @@ func (repo *BooksRepository) Update(ctx context.Context, data entity.Books, book
 		ExcludeColumn("updated_by").
 		Set("update_at = NOW()").
 		Set("title = ?", data.Title).
-		Set("author = ?", data.Author).
+		Set("author = ?", data.AuthorId).
 		Set("publication_year = ?", data.PublicationYear).
 		Where("id=?", bookId).
 		Exec(ctx)

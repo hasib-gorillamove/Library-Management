@@ -1,7 +1,7 @@
 create table books(
   id  serial,
   title text not null,
-  author text not null,
+  author_id int not null,
   publication_year int not null,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   update_at TIMESTAMP default null,

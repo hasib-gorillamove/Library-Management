@@ -8,6 +8,7 @@ import (
 type Writer struct {
 	bun.BaseModel `bun:"table:writer"`
 
+	AuthorID    int        `json:"author_id" bun:",pk"`
 	Name        string     `json:"name" bun:"name"`
 	Nationality string     `json:"nationality" bun:"nationality"`
 	Age         int        `json:"age" bun:"age"`
@@ -17,6 +18,7 @@ type Writer struct {
 	DeletedAt   *time.Time `json:"-" bun:",soft_delete"`
 	CreatedBy   *string    `json:"created_by" bun:"type:uuid,default:uuid_generate_v4()"`
 	UpdatedBy   *string    `json:"updated_by" bun:"type:uuid,default:uuid_generate_v4()"`
+	Books       []Books    `json:"books" bun:"rel:has-many,join:author_id=author_id"`
 }
 
 func (p *Writer) Validate() []FieldError {

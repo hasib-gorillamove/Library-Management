@@ -43,7 +43,7 @@ func (repo *WriterRepository) ListAllWriter(ctx context.Context, filter entity.W
 func (repo *WriterRepository) GetAWriter(ctx context.Context, id string) (entity.Writer, error) {
 	var data entity.Writer
 
-	err := repo.DB.NewSelect().Model(&data).Where("id =?", id).Scan(ctx)
+	err := repo.DB.NewSelect().Model(&data).Where("author_id =?", id).Relation("Books").Scan(ctx)
 
 	if err != nil {
 		return entity.Writer{}, err
