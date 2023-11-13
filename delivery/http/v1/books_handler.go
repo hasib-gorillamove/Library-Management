@@ -13,7 +13,6 @@ type BooksHandler struct {
 	Logger  logger.Logger
 }
 
-
 func NewBooksHandler(booksService *service.Service, logger logger.Logger) *BooksHandler {
 	return &BooksHandler{
 		Service: booksService,
