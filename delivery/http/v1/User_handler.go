@@ -5,7 +5,9 @@ import (
 	"github.com/golden-infotech/lib/logger"
 	"github.com/golden-infotech/service"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"time"
 )
 
 type UserHandler struct {
@@ -24,8 +26,10 @@ func (h *UserHandler) MapUserRoutes(userGroup *echo.Group, authenticated echo.Mi
 	userGroup.POST("", h.CreateUser)
 	userGroup.GET("", h.GetAllUser)
 	userGroup.GET("/:id", h.GetAUser)
+	userGroup.GET("/df/:email", h.GetUserByEmail)
 	userGroup.PUT("/:id", h.UpdateUser)
 	userGroup.DELETE("/:id", h.DeleteUser)
+	userGroup.POST("/df", h.Login)
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
@@ -105,23 +109,44 @@ func (h *UserHandler) GetAUser(c echo.Context) error {
 		Data:    res,
 	})
 }
+func (h *UserHandler) GetUserByEmail(c echo.Context) error {
+	email := c.Param("email")
+	res, err := h.UserService.GetUserByEmail(c.Request().Context(), email)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &entity.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, &entity.Response{
+		Success: true,
+		Message: "Successfully get a user",
+		Data:    res,
+	})
+}
 
 func (h *UserHandler) UpdateUser(c echo.Context) error {
 	id := c.Param("id")
 	data := entity.UserRegistration{}
 	err := c.Bind(&data)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, &entity.Response{
+		err := c.JSON(http.StatusBadRequest, &entity.Response{
 			Success: false,
 			Message: "invalid request",
 		})
+		if err != nil {
+			return err
+		}
 	}
 	validationError := data.Validate()
 	if validationError != nil {
-		c.JSON(http.StatusBadRequest, &entity.Response{
+		err := c.JSON(http.StatusBadRequest, &entity.Response{
 			Success: false,
 			Message: "Validation Error",
 		})
+		if err != nil {
+			return err
+		}
 	}
 	err = h.UserService.UpdateUser(c.Request().Context(), data, id)
 	if err != nil {
@@ -148,5 +173,50 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, &entity.Response{
 		Success: true,
 		Message: "successfully deleted User",
+	})
+}
+
+func (h *UserHandler) Login(c echo.Context) error {
+	login := entity.LoginInfo{}
+	err := c.Bind(&login)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &entity.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+	user, err := h.UserService.GetUserByEmail(c.Request().Context(), login.Email)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &entity.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
+	//checker := lib.HashPassword(login.Password)
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password)); err != nil {
+		return c.JSON(http.StatusBadRequest, &entity.Response{
+			Success: false,
+			Message: "Wrong password",
+		})
+	}
+	expirationTime := time.Now().Add(5 * 24 * time.Hour)
+	token, err := user.GetJwt(expirationTime)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &entity.Response{
+			Success: false,
+			Message: "Error signing token",
+		})
+	}
+	c.SetCookie(&http.Cookie{
+		Name:    "token",
+		Value:   *token,
+		Expires: expirationTime,
+	})
+	return c.JSON(http.StatusOK, &entity.Response{
+		Success: true,
+		Message: "All ok ,Good to go ",
 	})
 }

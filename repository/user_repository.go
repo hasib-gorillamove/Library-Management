@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/golden-infotech/entity"
+	"github.com/golden-infotech/lib"
 	"github.com/uptrace/bun"
 )
 
@@ -17,13 +18,14 @@ func NewUserRepository(db *bun.DB) *UserRepository {
 	}
 }
 func (repo *UserRepository) CreateUser(ctx context.Context, data entity.UserRegistration) error {
-	passwordHash := data.Password
+	passwordToHash := data.Password
+	HashPassword := lib.HashPassword(passwordToHash)
+	data.Password = HashPassword
 
 	_, err := repo.DB.NewInsert().Model(&data).Exec(ctx)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -54,6 +56,16 @@ func (repo *UserRepository) GetAUser(ctx context.Context, id string) (entity.Use
 		return entity.UserRegistration{}, err
 	}
 
+	return data, nil
+}
+
+func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (entity.UserRegistration, error) {
+	var data entity.UserRegistration
+
+	err := repo.DB.NewSelect().Model(&data).Where("email=?", email).Scan(ctx)
+	if err != nil {
+		return entity.UserRegistration{}, err
+	}
 	return data, nil
 }
 func (repo *UserRepository) UpdateUser(ctx context.Context, data entity.UserRegistration, id string) error {

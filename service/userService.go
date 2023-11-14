@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/golden-infotech/entity"
 )
 
@@ -33,6 +34,16 @@ func (s *UserService) GetAllUser(ctx context.Context, filter entity.UserFilter) 
 
 func (s *UserService) GetAUser(ctx context.Context, id string) (entity.UserRegistration, error) {
 	res, err := s.UserRepository.GetAUser(ctx, id)
+	if err != nil {
+		return entity.UserRegistration{}, err
+	}
+	return res, nil
+}
+func (s *UserService) GetUserByEmail(ctx context.Context, email string) (entity.UserRegistration, error) {
+
+	fmt.Println(email)
+
+	res, err := s.UserRepository.GetUserByEmail(ctx, email)
 	if err != nil {
 		return entity.UserRegistration{}, err
 	}

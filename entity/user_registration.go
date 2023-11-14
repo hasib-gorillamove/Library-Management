@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"github.com/golang-jwt/jwt"
 	"github.com/uptrace/bun"
 	"time"
 )
@@ -19,10 +20,27 @@ type UserRegistration struct {
 	DeletedAt  *time.Time `json:"-" bun:",soft_delete"`
 	CreatedBy  *string    `json:"created_by" bun:"type:uuid,default:uuid_generate_v4()"`
 	UpdatedBy  *string    `json:"updated_by" bun:"type:uuid,default:uuid_generate_v4()"`
+	jwt.StandardClaims
 }
 
 func (p *UserRegistration) Validate() []FieldError {
 	return validate(p)
+}
+
+func (p *UserRegistration) GetJwt(expirationTime time.Time) (*string, error) {
+	jwtSecret := "secret"
+	claims := &UserRegistration{
+		Email: p.Email,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	tokenBase := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := tokenBase.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return nil, err
+	}
+	return &token, err
 }
 
 type UserFilter struct {

@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"strings"
 	"time"
@@ -59,4 +60,12 @@ func GetBaseUrlFromS3(url, AwsS3BaseURL, AwsCloudfrontURL string) (string, error
 	}
 	fmt.Println(url)
 	return url, nil
+}
+func HashPassword(password string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
+	if err != nil {
+		return err.Error()
+	}
+	return string(hash)
+
 }
