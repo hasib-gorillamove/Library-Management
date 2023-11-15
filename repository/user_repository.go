@@ -18,6 +18,8 @@ func NewUserRepository(db *bun.DB) *UserRepository {
 	}
 }
 func (repo *UserRepository) CreateUser(ctx context.Context, data entity.UserRegistration) error {
+	//hashing the password
+	
 	passwordToHash := data.Password
 	HashPassword := lib.HashPassword(passwordToHash)
 	data.Password = HashPassword
