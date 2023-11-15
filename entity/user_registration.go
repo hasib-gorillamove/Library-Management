@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+type JWTClaims struct {
+	Email string `json:"email"`
+	jwt.StandardClaims
+}
 type UserRegistration struct {
 	bun.BaseModel `bun:"table:user_registration"`
 
@@ -20,7 +24,6 @@ type UserRegistration struct {
 	DeletedAt  *time.Time `json:"-" bun:",soft_delete"`
 	CreatedBy  *string    `json:"created_by" bun:"type:uuid,default:uuid_generate_v4()"`
 	UpdatedBy  *string    `json:"updated_by" bun:"type:uuid,default:uuid_generate_v4()"`
-	jwt.StandardClaims
 }
 
 func (p *UserRegistration) Validate() []FieldError {
@@ -29,7 +32,7 @@ func (p *UserRegistration) Validate() []FieldError {
 
 func (p *UserRegistration) GetJwt(expirationTime time.Time) (*string, error) {
 	jwtSecret := "secret"
-	claims := &UserRegistration{
+	claims := &JWTClaims{
 		Email: p.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
@@ -40,7 +43,7 @@ func (p *UserRegistration) GetJwt(expirationTime time.Time) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &token, err
+	return &token, nil
 }
 
 type UserFilter struct {

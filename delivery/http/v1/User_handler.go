@@ -29,7 +29,7 @@ func (h *UserHandler) MapUserRoutes(userGroup *echo.Group, authenticated echo.Mi
 	userGroup.GET("/df/:email", h.GetUserByEmail)
 	userGroup.PUT("/:id", h.UpdateUser)
 	userGroup.DELETE("/:id", h.DeleteUser)
-	userGroup.POST("/df", h.Login)
+	userGroup.POST("/login", h.Login)
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
@@ -202,7 +202,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 			Message: "Wrong password",
 		})
 	}
-	expirationTime := time.Now().Add(5 * 24 * time.Hour)
+	expirationTime := time.Now().Add(24 * time.Hour)
 	token, err := user.GetJwt(expirationTime)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &entity.Response{
