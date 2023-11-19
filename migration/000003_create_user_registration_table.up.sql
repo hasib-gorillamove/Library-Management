@@ -1,5 +1,5 @@
 create table user_registration(
-                user_id int ,
+                user_id serial,
                 first_name text not null,
                 last_name text not null,
                 occupation text not null,

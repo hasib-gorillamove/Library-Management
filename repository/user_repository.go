@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/golden-infotech/entity"
+	"github.com/golden-infotech/entity/httpentity"
 	"github.com/golden-infotech/lib"
 	"github.com/uptrace/bun"
 )
@@ -17,9 +18,9 @@ func NewUserRepository(db *bun.DB) *UserRepository {
 		DB: db,
 	}
 }
-func (repo *UserRepository) CreateUser(ctx context.Context, data entity.UserRegistration) error {
+func (repo *UserRepository) CreateUser(ctx context.Context, data httpentity.CreateUserRegistration) error {
 	//hashing the password
-	
+
 	passwordToHash := data.Password
 	HashPassword := lib.HashPassword(passwordToHash)
 	data.Password = HashPassword

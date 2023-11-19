@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/golden-infotech/entity"
+	"github.com/golden-infotech/entity/httpentity"
 )
 
 type UserService struct {
@@ -16,7 +17,7 @@ func NewUserService(userRepository UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, data entity.UserRegistration) error {
+func (s *UserService) CreateUser(ctx context.Context, data httpentity.CreateUserRegistration) error {
 	err := s.UserRepository.CreateUser(ctx, data)
 	if err != nil {
 		return err

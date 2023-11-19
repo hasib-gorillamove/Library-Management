@@ -74,7 +74,7 @@ func (repo *WriterRepository) Delete(ctx context.Context, id string) error {
 	res, err := repo.DB.NewDelete().Model(&data).Where("id=?", id).Exec(ctx)
 	rowsAffected, _ := res.RowsAffected()
 	if rowsAffected == 0 {
-		return errors.New("No data matched")
+		return errors.New("no data matched")
 	}
 	return err
 

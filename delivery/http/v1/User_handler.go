@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/golden-infotech/entity"
+	"github.com/golden-infotech/entity/httpentity"
 	"github.com/golden-infotech/lib/logger"
 	"github.com/golden-infotech/service"
 	"github.com/labstack/echo/v4"
@@ -33,7 +34,7 @@ func (h *UserHandler) MapUserRoutes(userGroup *echo.Group, authenticated echo.Mi
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
-	data := entity.UserRegistration{}
+	data := httpentity.CreateUserRegistration{}
 
 	err := c.Bind(&data)
 	if err != nil {
@@ -193,9 +194,6 @@ func (h *UserHandler) Login(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-
-	//checker := lib.HashPassword(login.Password)
-
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password)); err != nil {
 		return c.JSON(http.StatusBadRequest, &entity.Response{
 			Success: false,
@@ -215,6 +213,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 		Value:   *token,
 		Expires: expirationTime,
 	})
+
 	return c.JSON(http.StatusOK, &entity.Response{
 		Success: true,
 		Message: "All ok ,Good to go ",
